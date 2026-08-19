@@ -2,9 +2,26 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using SwissForge.Core.Json;
+
+//
+// System.Runtime.InteropServices is deliberately NOT imported wholesale.
+//
+// .NET Framework kept its pre-2.0 copies of the type-library descriptors - TYPEATTR,
+// FUNCDESC, ELEMDESC, VARDESC, INVOKEKIND and friends - in that namespace when the
+// supported versions moved to the .ComTypes child. Importing both makes every one of
+// those names ambiguous (CS0104) and net48 will not compile. This file wants the
+// ComTypes set throughout, so it imports only that and names the handful of members it
+// still needs from the parent namespace. Any descriptor added here later resolves to
+// ComTypes on its own.
+//
+using ComImportAttribute = System.Runtime.InteropServices.ComImportAttribute;
+using ComInterfaceType = System.Runtime.InteropServices.ComInterfaceType;
+using GuidAttribute = System.Runtime.InteropServices.GuidAttribute;
+using InterfaceTypeAttribute = System.Runtime.InteropServices.InterfaceTypeAttribute;
+using Marshal = System.Runtime.InteropServices.Marshal;
+using VarEnum = System.Runtime.InteropServices.VarEnum;
 
 namespace SwissForge.Probe
 {
