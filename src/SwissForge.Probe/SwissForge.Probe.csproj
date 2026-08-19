@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Windows-only by nature: it reads COM type libraries. -->
+    <TargetFramework>net48</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AssemblyName>swissforge-probe</AssemblyName>
+    <RootNamespace>SwissForge.Probe</RootNamespace>
+    <PlatformTarget>x64</PlatformTarget>
+    <Description>Dumps the real ESPRIT COM object model to JSON so the SwissForge adapter can be verified against it.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../SwissForge.Core/SwissForge.Core.csproj" />
+    <ProjectReference Include="../SwissForge.Esprit/SwissForge.Esprit.csproj" />
+  </ItemGroup>
+
+</Project>

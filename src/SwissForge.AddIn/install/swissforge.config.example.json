@@ -1,0 +1,48 @@
+{
+  // SwissForge add-in configuration.
+  //
+  // Copy this to one of these locations - the first one found wins:
+  //   %APPDATA%\SwissForge\swissforge.config.json       (per user)
+  //   %PROGRAMDATA%\SwissForge\swissforge.config.json   (whole machine)
+  //   next to SwissForge.AddIn.dll                      (per installation)
+  //
+  // Comments and trailing commas are allowed: these files get hand-edited.
+
+  "apiEnabled": true,
+  "apiPort": 8731,
+
+  // Leave empty and one is generated on first run and written back to the
+  // per-user file. Set it explicitly if you want the same token on every seat.
+  "apiToken": "",
+
+  // Binds to 127.0.0.1 only. Turning this on exposes the API to your network:
+  // anyone who can reach this machine and holds the token can drive it.
+  "apiAllowRemote": false,
+
+  "showStatusOnStartup": false,
+
+  // Your real purchase prices and proven cutting data. Anything you set here
+  // overrides the built-in defaults; anything you leave out is inherited.
+  // Quoting refuses to price a job off a built-in placeholder price, so this
+  // file is what unblocks it.
+  "materialsPath": "C:\\SwissForge\\materials.json",
+
+  "toolsPath": "C:\\SwissForge\\tools.json",
+  "machinePath": "C:\\SwissForge\\machine-l20.json",
+
+  // Outbound integration. Events are written to disk first and delivered on a
+  // timer, so a network outage delays them rather than losing them.
+  "outboxDirectory": "",
+  "outboxIntervalSeconds": 60,
+
+  "endpoints": [
+    // {
+    //   "name": "erp",
+    //   "url": "https://erp.example.com/hooks/swissforge",
+    //   "bearerToken": "...",
+    //   "signingSecret": "...",     // payloads get an X-SwissForge-Signature HMAC
+    //   "timeoutSeconds": 30,
+    //   "eventTypes": []            // empty means every event
+    // }
+  ]
+}

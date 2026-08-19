@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AssemblyName>SwissForge.AddIn</AssemblyName>
+    <RootNamespace>SwissForge.AddIn</RootNamespace>
+    <UseWindowsForms>true</UseWindowsForms>
+
+    <!--
+      COM visibility is what makes ESPRIT able to load this at all.
+
+      RegisterForComInterop is deliberately OFF by default. It runs regasm during the
+      build, which needs an elevated prompt - so turning it on means the project cannot
+      be built by an ordinary developer or by CI at all. Install-SwissForge.ps1 runs
+      regasm /codebase properly at install time, which is where that belongs.
+
+      Set -p:SwissForgeRegisterCom=true if you want the old build-time behaviour.
+    -->
+    <ComVisible>true</ComVisible>
+    <RegisterForComInterop Condition="'$(SwissForgeRegisterCom)' == 'true'">true</RegisterForComInterop>
+    <EnableComHosting>false</EnableComHosting>
+
+    <!-- ESPRIT is a 64-bit host. A bitness mismatch fails with an unhelpful "class not registered". -->
+    <PlatformTarget>x64</PlatformTarget>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <Description>SwissForge add-in for ESPRIT: cutting data, cycle time, quoting, program auditing, and a local REST API.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../SwissForge.Core/SwissForge.Core.csproj" />
+    <ProjectReference Include="../SwissForge.Esprit/SwissForge.Esprit.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="install\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

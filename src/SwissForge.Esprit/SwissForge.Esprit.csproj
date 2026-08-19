@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!--
+      .NET Framework 4.8 because that is what ESPRIT's process hosts. This project cannot
+      build on Linux or macOS: it needs the Windows reference assemblies and it talks COM.
+      Everything it depends on lives in SwissForge.Core, which does build anywhere - so the
+      engine layer stays testable on any machine and only this adapter is Windows-bound.
+    -->
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AssemblyName>SwissForge.Esprit</AssemblyName>
+    <RootNamespace>SwissForge.Esprit</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <Description>The only assembly in SwissForge that talks to ESPRIT.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../SwissForge.Core/SwissForge.Core.csproj" />
+  </ItemGroup>
+
+</Project>

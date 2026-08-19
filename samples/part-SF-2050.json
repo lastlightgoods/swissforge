@@ -1,0 +1,123 @@
+{
+  "partNumber": "SF-2050",
+  "revision": "B",
+  "customer": "Example Customer",
+  "description": "Stepped pin, M4 thread, cross hole, back bore",
+  "stock": {
+    "materialId": "12L14",
+    "diameterMm": 10,
+    "lengthMm": 3660,
+    "costPerBar": 18,
+    "remnantMm": 300,
+    "barFaceStockMm": 2
+  },
+  "overallLengthMm": 28,
+  "maxDiameterMm": 9.5,
+  "cutoffWidthMm": 1.5,
+  "backFaceStockMm": 0.3,
+  "quantity": 5000,
+  "annualUsage": 40000,
+  "scrapRate": 0.02,
+  "features": [
+    {
+      "id": "f-od1",
+      "kind": "TurnRough",
+      "label": "Rough 9.5 shoulder",
+      "side": "Main",
+      "diameterMm": 9.5,
+      "startDiameterMm": 10,
+      "lengthMm": 12,
+      "toleranceMm": 0.1,
+      "surfaceFinishRa": 0,
+      "threadPitchMm": 0,
+      "instances": 1,
+      "note": ""
+    },
+    {
+      "id": "f-od2",
+      "kind": "TurnFinish",
+      "label": "Finish 9.5 shoulder",
+      "side": "Main",
+      "diameterMm": 9.5,
+      "startDiameterMm": 9.7,
+      "lengthMm": 12,
+      "toleranceMm": 0.013,
+      "surfaceFinishRa": 1.6,
+      "threadPitchMm": 0,
+      "instances": 1,
+      "note": ""
+    },
+    {
+      "id": "f-thd",
+      "kind": "Thread",
+      "label": "M4 x 0.7 thread",
+      "side": "Main",
+      "diameterMm": 4,
+      "startDiameterMm": 4,
+      "lengthMm": 8,
+      "toleranceMm": 0.05,
+      "surfaceFinishRa": 0,
+      "threadPitchMm": 0.7,
+      "instances": 1,
+      "note": ""
+    },
+    {
+      "id": "f-xh",
+      "kind": "CrossDrill",
+      "label": "2.0 cross hole",
+      "side": "Main",
+      "diameterMm": 2,
+      "startDiameterMm": 0,
+      "lengthMm": 9.5,
+      "toleranceMm": 0.05,
+      "surfaceFinishRa": 0,
+      "threadPitchMm": 0,
+      "instances": 2,
+      "note": ""
+    },
+    {
+      "id": "f-bore",
+      "kind": "BackDrill",
+      "label": "3.0 back bore",
+      "side": "Sub",
+      "diameterMm": 3,
+      "startDiameterMm": 0,
+      "lengthMm": 10,
+      "toleranceMm": 0.05,
+      "surfaceFinishRa": 0,
+      "threadPitchMm": 0,
+      "instances": 1,
+      "note": ""
+    },
+    {
+      "id": "f-bface",
+      "kind": "BackFace",
+      "label": "Back face to length",
+      "side": "Sub",
+      "diameterMm": 0,
+      "startDiameterMm": 9.5,
+      "lengthMm": 4.75,
+      "toleranceMm": 0.05,
+      "surfaceFinishRa": 0,
+      "threadPitchMm": 0,
+      "instances": 1,
+      "note": ""
+    }
+  ],
+  "secondaryOps": [
+    {
+      "name": "Deburr and tumble",
+      "costPerPart": 0.06,
+      "lotCharge": 0,
+      "leadTimeDays": 0,
+      "vendor": "in house"
+    },
+    {
+      "name": "Zinc plate",
+      "costPerPart": 0.14,
+      "lotCharge": 120,
+      "leadTimeDays": 5,
+      "vendor": "Example Plating"
+    }
+  ]
+}

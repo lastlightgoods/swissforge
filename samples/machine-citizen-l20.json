@@ -1,0 +1,34 @@
+{
+  "id": "L20-VIII",
+  "name": "Citizen L20-VIII",
+  "builder": "Citizen",
+  "dialect": "CitizenCincom",
+
+  "maxBarDiameterMm": 20.0,
+  "maxZStrokePerPassMm": 200.0,
+
+  "channelCount": 3,
+  "channelNames": ["$1", "$2", "$3"],
+
+  "hasSubSpindle": true,
+  "hasGuideBushing": true,
+  "supportsChucker": true,
+  "hasHighPressureCoolant": true,
+  "hasPartsConveyor": true,
+
+  "mainSpindleMaxRpm": 10000,
+  "subSpindleMaxRpm": 8000,
+  "liveToolMaxRpm": 6000,
+  "mainSpindlePowerKw": 3.7,
+
+  "rapidRateMmPerMin": 32000,
+  "toolChangeSeconds": 0.4,
+  "transferSeconds": 2.5,
+  "barFeedSeconds": 1.2,
+  "barChangeSeconds": 45,
+  "spindleRampSeconds": 0.35,
+
+  "hourlyRate": 75.0,
+  "utilizationFactor": 0.85,
+  "productiveHoursPerDay": 20.0
+}

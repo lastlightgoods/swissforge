@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # The engine layer has no ESPRIT dependency and no packages, so it verifies
+  # anywhere. This is the job that actually proves the maths.
+  engines:
+    name: Engines (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Verify
+        run: ./verify.sh
+
+  # The .NET Framework 4.8 projects - the ESPRIT adapter, the add-in, and the
+  # probe - only compile on Windows. This job is what confirms they build; it
+  # cannot confirm they talk to ESPRIT correctly, which needs a licensed seat
+  # and the probe. See docs/ESPRIT-INTEGRATION.md.
+  windows:
+    name: Full solution (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore SwissForge.sln
+
+      - name: Build everything, including the net48 projects
+        run: dotnet build SwissForge.sln -c Release --no-restore
+
+      - name: Run the engine tests on Windows too
+        run: dotnet run --project tests/SwissForge.Core.Tests -c Release --no-build
+
+      - name: Smoke-test the CLI
+        shell: pwsh
+        run: |
+          $cli = "src/SwissForge.Cli/bin/Release/net8.0/swissforge.dll"
+          dotnet $cli version
+          dotnet $cli materials | Select-Object -First 5
+          dotnet $cli sample > part.json
+          dotnet $cli plan part.json
+          dotnet $cli quote part.json --breaks 100,1000
+
+          # The broken sample must be caught. If this exits 0, the linter has regressed.
+          dotnet $cli lint samples/program-broken.nc --dialect CitizenCincom
+          if ($LASTEXITCODE -eq 0) {
+            Write-Error "The linter passed a program with known critical defects."
+            exit 1
+          }
+
+          # And the clean sample must not be flagged.
+          dotnet $cli lint samples/program-clean.nc --dialect CitizenCincom
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "The linter flagged the known-clean sample."
+            exit 1
+          }
+
+          Write-Host "CLI smoke tests passed."
+
+      - name: Stage the artifacts
+        run: ./build.ps1 -Configuration Release
+        shell: pwsh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: swissforge-windows
+          path: dist/
+          retention-days: 14

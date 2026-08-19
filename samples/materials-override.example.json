@@ -1,0 +1,54 @@
+{
+  // Your shop's real numbers, layered over the built-in library.
+  //
+  // Anything you set here replaces the default. Anything you leave out is inherited,
+  // so you only have to write down what you actually know.
+  //
+  // Setting costPerKg is what clears the "indicative price" flag on a material and
+  // unblocks quoting for it. Until then the quoting engine will refuse to produce a
+  // sendable price, on the grounds that a quote built on an invented metal price is
+  // the kind of mistake that only surfaces on the invoice.
+
+  "materials": [
+    {
+      "id": "12L14",
+      "costPerKg": 2.15,
+      // Proven on the L20 with the current coated grade - 20% above the book number.
+      "baseSurfaceSpeedMPerMin": 240,
+      "note": "House standard. 240 m/min proven at 0.24 mm/rev on the L20."
+    },
+    {
+      "id": "SS303",
+      "costPerKg": 7.40,
+      "toolLifeFactor": 0.7,
+      "note": "Current bar is running harder than the last lot. Watch edges."
+    },
+    {
+      "id": "SS316",
+      "costPerKg": 9.80
+    },
+    {
+      "id": "AL6061",
+      "costPerKg": 6.90
+    },
+    {
+      "id": "C360",
+      "costPerKg": 12.30
+    },
+    {
+      // A grade the built-in library does not cover: define it in full.
+      "id": "SS303-HARD",
+      "name": "303 stainless, hard drawn",
+      "group": "StainlessAustenitic",
+      "hardnessBhn": 240,
+      "nominalHardnessBhn": 160,
+      "baseSurfaceSpeedMPerMin": 130,
+      "densityGPerCm3": 8.0,
+      "costPerKg": 8.10,
+      "toolLifeFactor": 0.6,
+      "feedFactor": 0.9,
+      "requiresChipBreaking": false,
+      "note": "Cold drawn bar. Harder than annealed 303 - the hardness correction handles the speed."
+    }
+  ]
+}

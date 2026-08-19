@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!--
+      Core multi-targets so the same assembly can be consumed by the .NET Framework 4.8
+      add-in that ESPRIT loads and by the modern .NET CLI and API host.
+
+      SwissForgeVerifyOnly=true drops to net8.0 alone. That exists so the engine layer can
+      be built and unit-tested on a machine with no NuGet feed and no .NET Framework
+      reference assemblies - a Linux CI box, or a locked-down shop PC. It changes nothing
+      about the shipped build.
+    -->
+    <TargetFrameworks Condition="'$(SwissForgeVerifyOnly)' == 'true'">net8.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(SwissForgeVerifyOnly)' != 'true'">netstandard2.0;net8.0</TargetFrameworks>
+
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <AssemblyName>SwissForge.Core</AssemblyName>
+    <RootNamespace>SwissForge.Core</RootNamespace>
+    <Description>Swiss-type CNC engine layer: cutting data, multi-channel cycle time, quoting, and G-code analysis. No ESPRIT dependency.</Description>
+  </PropertyGroup>
+
+  <!-- Deliberately no PackageReference entries anywhere in this solution. See Json/JsonValue.cs. -->
+
+</Project>
