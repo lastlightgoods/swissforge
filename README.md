@@ -181,6 +181,198 @@ cd .\dist\addin
 Then restart ESPRIT. **Send back `swissforge-probe.json`** — that is what turns the adapter
 from careful guesswork into verified code.
 
+Prerequisites, configuration, uninstalling, and what to do when the add-in does not load are
+all in [Installation](#installation) below.
+
+---
+
+## Installation
+
+The Quick start above is the short version; this is the complete one.
+
+There are three ways to run SwissForge. The engine layer is identical in all of them — only
+the surface differs.
+
+| Surface | What it gives you | Requires |
+| --- | --- | --- |
+| **CLI** | `plan`, `quote`, `lint`, `materials` from a shell or a build script | .NET 8 SDK, any OS |
+| **REST API** | The same engines over HTTP, for ERP, MES, and shop dashboards | .NET 8 SDK, any OS |
+| **ESPRIT add-in** | Both of the above, plus the live document — it reads the part and the tooling out of ESPRIT itself | Windows, .NET Framework 4.8, a licensed ESPRIT seat |
+
+Start with the CLI even when the add-in is the goal. It needs no ESPRIT and no Windows, so
+it will tell you whether the engines agree with your shop's proven numbers before you spend
+anything on registry keys.
+
+### Prerequisites
+
+- **[.NET SDK 8 or later](https://dotnet.microsoft.com/download).** That is the whole list.
+  The solution has zero third-party dependencies by design, so there is nothing else to
+  acquire and no dependency tree to audit. The only package that restores is Microsoft's
+  `NETStandard.Library` targeting shim, and `nuget.config` constrains the feed to that one
+  package — an accidental `PackageReference` fails the restore rather than quietly landing
+  a dependency in your shop.
+- **For the add-in only:** Windows, plus the .NET Framework 4.8 targeting pack and the 4.x
+  developer tools. The installer needs `regasm.exe`, which ships with those. Visual Studio
+  installs both, as do the standalone Build Tools. ESPRIT must already be installed and
+  licensed.
+
+### The CLI and the API — any OS
+
+```bash
+git clone https://github.com/lastlightgoods/swissforge.git
+cd swissforge
+
+./verify.sh                                  # 324 checks, ~0.5s. Do this first.
+```
+
+`verify.sh` builds and runs the engine tests with `SwissForgeVerifyOnly=true`, which drops
+Core to `net8.0` alone. That is what lets it pass on a Linux CI box or a locked-down shop PC
+with no .NET Framework reference assemblies. If it fails, stop — nothing downstream is worth
+installing.
+
+Then build the CLI:
+
+```bash
+dotnet publish src/SwissForge.Cli -c Release -o ~/.local/swissforge
+
+# Either alias it:
+alias swissforge='dotnet ~/.local/swissforge/swissforge.dll'
+
+# ...or, for a machine with no .NET runtime installed, produce a single self-contained
+# executable and copy that anywhere:
+dotnet publish src/SwissForge.Cli -c Release -r win-x64 \
+  -p:PublishSingleFile=true --self-contained true -o dist/cli-standalone
+```
+
+Confirm it works, and that it disagrees with nothing you already trust:
+
+```bash
+swissforge version
+swissforge materials                          # the built-in cutting data
+swissforge sample > part.json
+swissforge plan part.json
+swissforge quote part.json --breaks 100,1000,25000
+swissforge lint samples/program-broken.nc --dialect CitizenCincom   # must exit non-zero
+```
+
+To run the REST API on its own, with no ESPRIT anywhere:
+
+```bash
+swissforge serve --port 8731
+```
+
+It binds to `127.0.0.1` only. See [docs/API.md](docs/API.md) for the endpoints and the
+authentication model.
+
+### The ESPRIT add-in — Windows
+
+Run all of this on the machine that has ESPRIT.
+
+**1. Build and stage.**
+
+```powershell
+.\build.ps1                                  # engine tests, then the full solution
+```
+
+`build.ps1` runs the engine tests before it builds anything, and refuses to continue if they
+fail. It stages to `.\dist`:
+
+```
+dist\addin      SwissForge.AddIn.dll + the install scripts
+dist\probe      swissforge-probe.exe
+dist\cli        swissforge.dll
+dist\samples    the sample parts, tools, and NC programs
+```
+
+**2. Probe your seat first.** With ESPRIT running and a document open:
+
+```powershell
+.\dist\probe\swissforge-probe.exe --full     # -> swissforge-probe.json
+```
+
+This dumps the COM object model your ESPRIT version actually exposes. It changes nothing and
+needs no elevation. **Please send `swissforge-probe.json` back** — see
+[docs/ESPRIT-INTEGRATION.md](docs/ESPRIT-INTEGRATION.md). It is what turns the adapter from
+careful guesswork into verified code.
+
+**3. Install.** From an **elevated** PowerShell prompt:
+
+```powershell
+cd .\dist\addin
+.\Install-SwissForge.ps1 -WhatIf              # see exactly what it would write
+.\Install-SwissForge.ps1
+```
+
+Elevation is required because COM registration writes to `HKLM`. The script does two things,
+and both must happen for ESPRIT to load anything:
+
+- Runs `regasm /codebase` with the **64-bit** regasm, because ESPRIT is a 64-bit host.
+  Registering with the 32-bit one puts the CLSID somewhere ESPRIT will never look, and the
+  failure surfaces later as an unhelpful "class not registered".
+- Writes a `SwissForge.AddIn` key with `LoadBehavior = 1` under every known ESPRIT `AddIns`
+  hive. The path moved when DP Technology became part of Hexagon and still varies by version,
+  so the script writes all seven candidates rather than guessing. Extra keys under a hive your
+  version does not read are inert — a much cheaper failure than the add-in silently never
+  loading.
+
+**4. Restart ESPRIT** and look for SwissForge in the add-in manager.
+
+### Configuring the add-in
+
+Copy [`swissforge.config.example.json`](src/SwissForge.AddIn/install/swissforge.config.example.json)
+to one of these. The first one found wins:
+
+```
+%APPDATA%\SwissForge\swissforge.config.json         per user
+%PROGRAMDATA%\SwissForge\swissforge.config.json     whole machine
+next to SwissForge.AddIn.dll                        per installation
+```
+
+Comments and trailing commas are allowed — these files get hand-edited on a shop floor.
+
+The settings that matter on day one:
+
+- **`materialsPath`, `toolsPath`, `machinePath`** — your real purchase prices, proven cutting
+  data, and machine configuration. Anything you set overrides the built-in defaults; anything
+  you leave out is inherited. Quoting **refuses to price a job off a built-in placeholder
+  price**, so pointing `materialsPath` at your real numbers is what unblocks it. Start from
+  [`samples/materials-override.example.json`](samples/materials-override.example.json).
+- **`apiEnabled`, `apiPort`** — the local REST API. Default port 8731.
+- **`apiToken`** — leave empty and one is generated on first run and written back to the
+  per-user file. Set it explicitly if you want the same token across every seat.
+- **`apiAllowRemote`** — off by default, and the API binds to `127.0.0.1`. Turning it on
+  exposes the API to your network: anyone who can reach the machine and holds the token can
+  drive it. Read [SECURITY.md](SECURITY.md) before you do.
+- **`outboxDirectory`, `endpoints`** — outbound ERP integration. Events are written to disk
+  first and delivered on a timer, so a network outage delays them rather than losing them.
+
+### Uninstalling
+
+```powershell
+# elevated:
+cd .\dist\addin
+.\Uninstall-SwissForge.ps1
+```
+
+This unregisters the COM class and removes the add-in keys from every hive the installer
+wrote to. Your configuration and outbox under `%APPDATA%\SwissForge` are left alone — those
+are yours, not the installer's.
+
+### When it does not load
+
+- **SwissForge is missing from the add-in manager.** Confirm the registry key exists under a
+  hive your version reads. Some versions honour only `LoadBehavior = 3` ("load at startup")
+  rather than `1` ("load on demand"); change the value and restart. The add-in is cheap to
+  start either way.
+- **"Class not registered".** Almost always a bitness mismatch — re-run the installer from an
+  elevated prompt and check it picked `Framework64\v4.0.30319\regasm.exe`.
+- **`regasm.exe not found`.** The .NET Framework 4.x developer tools are not installed. See
+  Prerequisites.
+- **It loads, but quoting refuses to price anything.** Working as intended: no real material
+  price is configured. See `materialsPath` above.
+- **Anything else.** Run `swissforge-probe.exe --full` and include the JSON in the issue —
+  it identifies exactly what your seat exposes.
+
 ---
 
 ## Architecture
