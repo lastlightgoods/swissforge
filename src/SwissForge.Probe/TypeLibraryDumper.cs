@@ -6,6 +6,12 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using SwissForge.Core.Json;
 
+// .NET Framework declares INVOKEKIND in both System.Runtime.InteropServices and its
+// .ComTypes child; the former is the obsolete pre-ComTypes copy, and having both
+// namespaces imported above makes the bare name ambiguous (CS0104). Everything else
+// here reads the ComTypes descriptors, so name that one explicitly.
+using INVOKEKIND = System.Runtime.InteropServices.ComTypes.INVOKEKIND;
+
 namespace SwissForge.Probe
 {
     /// <summary>
